@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import sequelize from './config/database';
 import authRoutes from './routes/auth.routes';
+import taskRoutes from './routes/task.routes';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/tasks', taskRoutes);
 
 const start = async () => {
   try {
