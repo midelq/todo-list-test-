@@ -2,20 +2,21 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import sequelize from './config/database';
+import authRoutes from './routes/auth.routes';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
+const PORT = process.env.PORT || 5050;
 
 app.use(cors());
 app.use(express.json());
 
-
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+app.use('/api/auth', authRoutes);
 
 const start = async () => {
   try {
