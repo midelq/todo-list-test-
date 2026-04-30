@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import type { Task, TaskStatus } from '../../types';
 import { useUpdateTask, useDeleteTask } from '../../hooks/useTasks';
 import styles from './TaskCard.module.css';
@@ -7,12 +9,31 @@ interface Props {
 }
 
 const TaskCard = ({ task }: Props) => {
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(task.title);
   const { mutate: updateTask } = useUpdateTask();
   const { mutate: deleteTask, isPending: isDeleting } = useDeleteTask();
 
   const handleStatusChange = (status: TaskStatus) => {
     if (task.status !== status) {
       updateTask({ id: task.id, data: { status } });
+    }
+  };
+
+  const handleTitleSubmit = () => {
+    if (editedTitle.trim() && editedTitle !== task.title) {
+      updateTask({ id: task.id, data: { title: editedTitle.trim() } });
+    } else {
+      setEditedTitle(task.title);
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') handleTitleSubmit();
+    if (e.key === 'Escape') {
+      setEditedTitle(task.title);
+      setIsEditingTitle(false);
     }
   };
 
@@ -23,9 +44,22 @@ const TaskCard = ({ task }: Props) => {
   };
 
   return (
-    <div className={`${styles.card} ${task.status === 'done' ? styles.isDone : ''}`}>
+    <div className={`${styles.card} ${styles[`is_${task.status}`]}`}>
       <div className={styles.content}>
-        <h3 className={styles.title}>{task.title}</h3>
+        {isEditingTitle ? (
+          <input
+            autoFocus
+            className={styles.titleEditInput}
+            value={editedTitle}
+            onChange={(e) => setEditedTitle(e.target.value)}
+            onBlur={handleTitleSubmit}
+            onKeyDown={handleKeyDown}
+          />
+        ) : (
+          <h3 className={styles.title} onClick={() => setIsEditingTitle(true)}>
+            {task.title}
+          </h3>
+        )}
         {task.description && <p className={styles.description}>{task.description}</p>}
         
         <div className={styles.actions}>
